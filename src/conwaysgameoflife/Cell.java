@@ -17,15 +17,15 @@ public class Cell {
     private boolean toKill;
     private boolean toRevive;
 
-    public Cell(double x, double y, double size, boolean shouldStartAlive) {
+    public Cell(double x, double y, double cellSize, boolean shouldStartAlive) {
         isAlive.set(shouldStartAlive);
         
-        shape = new Rectangle(x, y, size, size);
-        shape.setFill(shouldStartAlive ? Constants.CELL_ALIVE_COLOR : Constants.CELL_DEAD_COLOR);
+        shape = new Rectangle(x, y, cellSize, cellSize);
         shape.setOnMouseClicked(e -> {
             isAlive.set(!isAlive.get());
             //System.out.println(isAlive.get());
                 });
+        shape.setStroke(Constants.CELL_STROKE_COLOR);
         shape.fillProperty().bind(Bindings.when(isAlive).then(Constants.CELL_ALIVE_COLOR).otherwise(Constants.CELL_DEAD_COLOR));
     }
 

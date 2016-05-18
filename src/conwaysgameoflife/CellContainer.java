@@ -14,11 +14,11 @@ public class CellContainer {
     
     private List<List<Cell>> cellArray = new ArrayList();
     
-    public CellContainer(int width, int height) {
+    public CellContainer(int width, int height, double cellSize) {
         for (int i = 0; i < width; i++) {
             cellArray.add(new ArrayList());
             for (int j = 0; j < height; j++) {
-                Cell newCell = new Cell(i * Constants.CELL_SIZE, j * Constants.CELL_SIZE, Constants.CELL_SIZE, false);
+                Cell newCell = new Cell(i * cellSize, j * cellSize, cellSize, false);
                 cellArray.get(i).add(newCell);
             }
         }
@@ -73,5 +73,14 @@ public class CellContainer {
                 group.getChildren().add(cellArray.get(i).get(j).getShape());
             }
         }
+    }
+    
+    public void clearBoard() {
+        for (int i = 0; i < cellArray.size(); i++) {
+            for (int j = 0; j < cellArray.get(i).size(); j++) {
+                cellArray.get(i).get(j).setToKill();
+            }
+        }
+        updateCells();
     }
 }
