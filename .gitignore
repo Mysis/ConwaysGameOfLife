@@ -1,0 +1,6 @@
+*.class
+*.jar
+*.jnlp
+*.html
+dist/**
+build/**
