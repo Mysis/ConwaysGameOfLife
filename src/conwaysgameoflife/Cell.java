@@ -20,7 +20,7 @@ public class Cell {
     public Cell(double x, double y, double cellSize, boolean shouldStartAlive) {
         isAlive.set(shouldStartAlive);
         
-        shape = new Rectangle(x, y, cellSize, cellSize);
+        shape = new Rectangle(x , y , cellSize, cellSize);
         shape.setOnMouseClicked(e -> {
             isAlive.set(!isAlive.get());
             //System.out.println(isAlive.get());

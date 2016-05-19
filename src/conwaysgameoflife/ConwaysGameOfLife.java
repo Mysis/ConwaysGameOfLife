@@ -14,11 +14,12 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.Group;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.Scene;
-import javafx.scene.Group;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -26,6 +27,7 @@ public class ConwaysGameOfLife extends Application {
 
     private Group root = new Group();
     private Group cellGroup = new Group();
+    private Rectangle uiBackground;
     private VBox uiMainContainer;
     private HBox uiContainerA;
     private HBox uiContainerB;
@@ -47,15 +49,14 @@ public class ConwaysGameOfLife extends Application {
     @Override
     public void start(Stage primaryStage) {
 
-        cells = new CellContainer(Constants.CELLS_PER_ROW, Constants.CELLS_PER_COLUMN, Constants.CELL_SIZE);
-        System.out.println(Constants.CELL_SIZE);
+        cells = new CellContainer((int)(Constants.MAIN_STAGE_WIDTH / Constants.CELL_SIZE) + Constants.CELLS_OUTSIDE_STAGE * 2, (int)(Constants.MAIN_STAGE_HEIGHT / Constants.CELL_SIZE) + Constants.CELLS_OUTSIDE_STAGE * 2, Constants.CELL_SIZE);
         cells.addCellsToGroup(cellGroup);
-        root.getChildren().add(cellGroup);
+        cellGroup.setLayoutX(-Constants.CELLS_OUTSIDE_STAGE * Constants.CELL_SIZE);
+        cellGroup.setLayoutY(-Constants.CELLS_OUTSIDE_STAGE * Constants.CELL_SIZE);
 
         nextButton = new Button("Next Generation");
         nextButton.setOnAction(e -> {
             cells.toNextGeneration();
-            cells.updateCells();
         });
         autoButton = new Button("Toggle Auto Advance");
         autoButton.textProperty().bind((Bindings.when(isPlaying).then("Stop Autoplay").otherwise("Start Autoplay")));
@@ -64,7 +65,6 @@ public class ConwaysGameOfLife extends Application {
                 isPlaying.set(true);
                 mainTimeline = new Timeline(new KeyFrame(new Duration(Double.parseDouble(timeField.textProperty().get())), t -> {
                     cells.toNextGeneration();
-                    cells.updateCells();
                 }));
                 mainTimeline.setCycleCount(Timeline.INDEFINITE);
                 mainTimeline.playFromStart();
@@ -76,6 +76,16 @@ public class ConwaysGameOfLife extends Application {
         timeLabel = new Label("Delay (ms):");
         timeField = new TextField("1000");
         updateTime = new Button("Update time");
+        updateTime.setOnAction(e -> {
+            if (isPlaying.get()) {
+                mainTimeline.stop();
+                mainTimeline = new Timeline(new KeyFrame(new Duration(Double.parseDouble(timeField.textProperty().get())), t -> {
+                    cells.toNextGeneration();
+                }));
+                mainTimeline.setCycleCount(Timeline.INDEFINITE);
+                mainTimeline.playFromStart();
+            }
+        });
         clearButton = new Button("Clear");
         clearButton.setOnAction(e -> cells.clearBoard());
         changeCellSizeField = new TextField("25");
@@ -84,23 +94,32 @@ public class ConwaysGameOfLife extends Application {
             double newSize = Double.parseDouble(changeCellSizeField.getText());
             if (newSize >= 5) {
                 cellGroup.getChildren().clear();
-                cells = new CellContainer((int)(Constants.MAIN_STAGE_WIDTH / newSize), (int)(Constants.MAIN_STAGE_HEIGHT / newSize), newSize);
+                cells = new CellContainer((int)(Constants.MAIN_STAGE_WIDTH / newSize) + Constants.CELLS_OUTSIDE_STAGE * 2, (int)(Constants.MAIN_STAGE_HEIGHT / newSize) + Constants.CELLS_OUTSIDE_STAGE * 2, newSize);
                 cells.addCellsToGroup(cellGroup);
+                cellGroup.setLayoutX(-Constants.CELLS_OUTSIDE_STAGE * newSize);
+                cellGroup.setLayoutY(-Constants.CELLS_OUTSIDE_STAGE * newSize);
+                //cellGroup.setLayoutX(100);
+                //cellGroup.setLayoutY(100);
             }
         });
+        uiBackground = new Rectangle(0, 0, Constants.SCREEN_WIDTH, 500);
+        uiBackground.setFill(Constants.MAIN_UI_COLOR);
         uiContainerA = new HBox(nextButton, autoButton, timeLabel, timeField, updateTime);
         uiContainerA.setSpacing(10);
         uiContainerB = new HBox(clearButton, changeCellSizeField, changeCellSizeButton);
         uiContainerB.setSpacing(10);
-        uiMainContainer = new VBox(uiContainerA, uiContainerB);
+        uiMainContainer = new VBox(uiContainerA, uiContainerB, uiBackground);
         uiMainContainer.setSpacing(12);
         uiMainContainer.setLayoutX(30);
         uiMainContainer.setLayoutY(Constants.MAIN_STAGE_HEIGHT + 12);
+        root.getChildren().add(cellGroup);
         root.getChildren().add(uiMainContainer);
         Scene scene = new Scene(root, Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT, Color.GREY);
 
         primaryStage.setTitle("Conways Game Of Life");
         primaryStage.setScene(scene);
+        primaryStage.setResizable(false);
+        primaryStage.sizeToScene();
         primaryStage.show();
     }
 
